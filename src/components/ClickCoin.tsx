@@ -13,11 +13,11 @@ import { Animated, Easing, Image, Pressable, StyleSheet, View } from 'react-nati
  * If you add extra levels in config.ts, add images to this array too.
  */
 const LEVEL_IMAGES = [
-  require('../../assets/tap-coin.png'), // Level 1
-  require('../../assets/tap-coin.png'), // Level 2
-  require('../../assets/tap-coin.png'), // Level 3
-  require('../../assets/tap-coin.png'), // Level 4
-  require('../../assets/tap-coin.png'), // Level 5
+  require('../../assets/taso2.jpeg'), // Level 1
+  require('../../assets/taso1.jpeg'), // Level 2
+  require('../../assets/Testi.jpeg'), // Level 3
+  require('../../assets/taso4.jpeg'), // Level 4
+  require('../../assets/taso5.jpeg'), // Level 5
 ];
 
 type ClickCoinProps = {

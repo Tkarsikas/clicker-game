@@ -55,9 +55,9 @@ The active coin component is `src/components/ClickCoin.tsx`. It contains a
 
 ```tsx
 const LEVEL_IMAGES = [
-  require('../../assets/level1.png'), // Level 1
-  require('../../assets/level2.png'), // Level 2
-  require('../../assets/level3.png'), // Level 3
+  require('../../assets/taso2.jpeg'), // Level 1
+  require('../../assets/taso1.jpeg'), // Level 2
+  require('../../assets/Testi.jpeg'), // Level 3
   require('../../assets/level4.png'), // Level 4
   require('../../assets/level5.png'), // Level 5
 ];
