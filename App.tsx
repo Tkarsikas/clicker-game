@@ -4,7 +4,10 @@ import {
   Animated,
   Easing,
   Pressable,
+  Platform,
   SafeAreaView,
+  StatusBar as NativeStatusBar,
+  useWindowDimensions,
   ScrollView,
   StyleSheet,
   Text,
@@ -19,6 +22,8 @@ const C = {
 };
 
 export default function App() {
+  const { height: screenHeight, width: screenWidth } = useWindowDimensions();
+  const compact = screenHeight < 780 || screenWidth < 375;
   const [level, setLevel] = useState(0);
   const [wallet, setWallet] = useState(0);
   const [power, setPower] = useState(1);
@@ -113,10 +118,10 @@ export default function App() {
   const tilt = float.interpolate({ inputRange: [0, 1], outputRange: ['-6deg', '6deg'] });
 
   return (
-    <SafeAreaView style={styles.root}>
+    <SafeAreaView style={[styles.root, Platform.OS === 'android' && { paddingTop: NativeStatusBar.currentHeight ?? 24, paddingBottom: 24 }]}>
       <StatusBar style="light" />
-      <ScrollView contentContainerStyle={styles.scroll} bounces={false}>
-        <View style={styles.heading}>
+      <ScrollView style={styles.scroller} contentContainerStyle={[styles.scroll, compact && styles.compactScroll]} bounces={false} showsVerticalScrollIndicator keyboardShouldPersistTaps="handled">
+        <View style={[styles.heading, compact && styles.compactHeading]}>
           <Text style={styles.overline}>✦ THE ULTIMATE TAP CHALLENGE ✦</Text>
           <Text style={styles.title}>COIN <Text style={styles.titleAccent}>QUEST</Text></Text>
           <Text style={styles.subtitle}>Tap fast. Power up. Conquer all five levels.</Text>
@@ -156,7 +161,7 @@ export default function App() {
           </View>
         </View>
 
-        <View style={styles.playArea}>
+        <View style={[styles.playArea, compact && styles.compactPlayArea]}>
           <View style={styles.haloOuter} />
           <View style={styles.haloInner} />
           <Text style={[styles.sparkle, { top: 28, left: 38 }]}>✦</Text>
@@ -224,7 +229,11 @@ export default function App() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bg },
-  scroll: { flexGrow: 1, paddingHorizontal: 20, paddingTop: 24, paddingBottom: 32, alignItems: 'stretch' },
+  scroller: { flex: 1 },
+  compactScroll: { paddingTop: 12, paddingBottom: 64 },
+  compactHeading: { marginBottom: 12 },
+  compactPlayArea: { height: 235 },
+  scroll: { flexGrow: 1, paddingHorizontal: 20, paddingTop: 24, paddingBottom: 64, alignItems: 'stretch' },
   heading: { alignItems: 'center', marginBottom: 24 },
   overline: { color: C.lavender, fontSize: 10, letterSpacing: 2, fontWeight: '800' },
   title: { color: C.gold, fontSize: 39, fontWeight: '900', letterSpacing: -1, marginTop: 6, textShadowColor: '#6840a0', textShadowRadius: 12 },
