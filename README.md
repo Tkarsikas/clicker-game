@@ -44,20 +44,33 @@ After changing a setting, save the file and reload Expo. Existing in-memory
 progress is not automatically reset by Fast Refresh; restart the game if
 needed.
 
-## Changing the clickable coin image
+## Changing the image for each level
 
-The active coin component is **`src/components/ClickCoin.tsx`**. The default image
-is `assets/tap-coin.png`. To change it:
+The active coin component is `src/components/ClickCoin.tsx`. It contains a
+`LEVEL_IMAGES` list for levels 1-5. All levels initially use
+`assets/tap-coin.png`, so the game works immediately.
 
-1. Copy your own PNG, JPG or WebP into `assets/` (transparent PNG recommended).
-2. In `ClickCoin.tsx`, change the single `COIN_IMAGE` line, for example:
+1. Add your PNG/JPG/WebP files to `assets/` (transparent PNG recommended).
+2. In `src/components/ClickCoin.tsx`, edit the corresponding entries:
 
 ```tsx
-const COIN_IMAGE = require('../../assets/my-new-coin.png');
+const LEVEL_IMAGES = [
+  require('../../assets/level1.png'), // Level 1
+  require('../../assets/level2.png'), // Level 2
+  require('../../assets/level3.png'), // Level 3
+  require('../../assets/level4.png'), // Level 4
+  require('../../assets/level5.png'), // Level 5
+];
 ```
 
-The image is displayed with `resizeMode="contain"`, so its aspect ratio is kept.
-The animation and press handler are inside ClickCoin, and the gameplay logic
-remains in App.tsx. Metro requires a **literal** file path in `require(...)`.
-Reload Expo after changing the image. The older `TapCoin.tsx` component is not
-used by the current App screen.
+**Important:** Only use those example paths after adding the matching files.
+`require(...)` must contain a literal path (not a variable) for Metro to
+bundle each image. No edits to `App.tsx` are needed: the current level is
+passed automatically to `ClickCoin`, and the image changes as you advance.
+The existing tap animations are shared by all images. Images keep their aspect
+ratio using `resizeMode="contain"`.
+
+If you add more levels to `src/game/config.ts`, add additional image entries.
+If the list is shorter than the level count, the final available image is used.
+
+The older `TapCoin.tsx` component is not used by the current App screen.
