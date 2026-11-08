@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useAudioPlayer } from 'expo-audio';
 import {
   Animated,
-  Easing,
   Pressable,
   Platform,
   SafeAreaView,
@@ -13,6 +12,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { ClickCoin } from './src/components/ClickCoin';
 import { rollingScore, type Tap } from './src/game';
 import { GAME_CONFIG, LEVEL_TARGETS, nextUpgradeCost, WINDOW_MS } from './src/game/config';
 
@@ -37,8 +37,6 @@ export default function App() {
   const [cleared, setCleared] = useState(false);
   const [won, setWon] = useState(false);
   const [flashId, setFlashId] = useState(0);
-  const bounce = useRef(new Animated.Value(1)).current;
-  const float = useRef(new Animated.Value(0)).current;
   const flash = useRef(new Animated.Value(0)).current;
   const id = useRef(0);
   const punchPlayer = useAudioPlayer(require('./assets/sounds/punch-bag.wav'));
@@ -57,16 +55,6 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(float, { toValue: 1, duration: 1700, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-        Animated.timing(float, { toValue: 0, duration: 1700, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
-      ]),
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [float]);
 
   const recent = rollingScore(taps, now);
   const goal = LEVEL_TARGETS[level];
@@ -89,9 +77,6 @@ export default function App() {
     setWallet(previous => previous + power);
     playPunch();
     setFlashId(previous => previous + 1);
-    bounce.stopAnimation();
-    bounce.setValue(0.87);
-    Animated.spring(bounce, { toValue: 1, friction: 4, tension: 240, useNativeDriver: true }).start();
     flash.stopAnimation();
     flash.setValue(1);
     Animated.timing(flash, { toValue: 0, duration: 650, useNativeDriver: true }).start();
@@ -125,8 +110,6 @@ export default function App() {
     setWon(false);
   };
 
-  const floatingY = float.interpolate({ inputRange: [0, 1], outputRange: [8, -12] });
-  const tilt = float.interpolate({ inputRange: [0, 1], outputRange: ['-6deg', '6deg'] });
 
   return (
     <SafeAreaView style={[styles.root, Platform.OS === 'android' && { paddingTop: NativeStatusBar.currentHeight ?? 24, paddingBottom: 24 }]}>
@@ -178,17 +161,7 @@ export default function App() {
           <Text style={[styles.sparkle, { top: 28, left: 38 }]}>✦</Text>
           <Text style={[styles.sparkle, { top: 70, right: 28 }]}>✧</Text>
           <Text style={[styles.sparkle, { bottom: 42, left: 26 }]}>✧</Text>
-          <Animated.View style={{ transform: [{ translateY: floatingY }, { rotate: tilt }, { scale: bounce }] }}>
-            <Pressable accessibilityRole="button" accessibilityLabel="Tap the magic coin" onPress={click} disabled={won}>
-              <View style={[styles.coinShadow, { width: coinSize, height: coinSize, borderRadius: coinSize / 2 }]}>
-                <View style={styles.coinOuter}>
-                  <View style={styles.coinInner}>
-                    <Text style={[styles.coinStar, { fontSize: coinSize * 0.44 }]}>★</Text>
-                  </View>
-                </View>
-              </View>
-            </Pressable>
-          </Animated.View>
+          <ClickCoin size={coinSize} onPress={click} disabled={won} />
           <Animated.Text
             key={flashId}
             pointerEvents="none"
@@ -275,10 +248,6 @@ const styles = StyleSheet.create({
   haloOuter: { position: 'absolute', width: 245, height: 245, borderRadius: 130, backgroundColor: '#413277', opacity: 0.26 },
   haloInner: { position: 'absolute', width: 203, height: 203, borderRadius: 110, backgroundColor: '#9e6bff', opacity: 0.14 },
   sparkle: { position: 'absolute', color: C.gold, fontSize: 26 },
-  coinShadow: { width: 174, height: 174, borderRadius: 87, paddingBottom: 9, backgroundColor: '#9e4a0c', elevation: 12, shadowColor: '#ffaa17', shadowOpacity: 0.65, shadowRadius: 22 },
-  coinOuter: { flex: 1, borderRadius: 100, padding: 13, backgroundColor: '#f9a722', borderWidth: 6, borderColor: '#ffe181', alignItems: 'center', justifyContent: 'center' },
-  coinInner: { width: '100%', height: '100%', borderRadius: 100, backgroundColor: '#ffca42', borderColor: '#d88110', borderWidth: 4, alignItems: 'center', justifyContent: 'center' },
-  coinStar: { fontSize: 77, color: '#fff1a1', textShadowColor: '#c67a13', textShadowOffset: { width: 3, height: 5 }, textShadowRadius: 1 },
   popText: { position: 'absolute', color: C.gold, fontSize: 31, fontWeight: '900', top: 27, alignSelf: 'center' },
   tapHint: { position: 'absolute', bottom: 1, color: C.lavender, fontWeight: '900', fontSize: 12, letterSpacing: 2 },
   upgradeCard: { backgroundColor: C.purple, padding: 9, borderRadius: 18, flexDirection: 'row', alignItems: 'center', gap: 12, borderBottomWidth: 5, borderBottomColor: '#5235b5' },

@@ -43,3 +43,21 @@ For example, set `levelTargets: [30, 80, 150, 350, 800]` to make the levels hard
 After changing a setting, save the file and reload Expo. Existing in-memory
 progress is not automatically reset by Fast Refresh; restart the game if
 needed.
+
+## Changing the clickable coin image
+
+The active coin component is **`src/components/ClickCoin.tsx`**. The default image
+is `assets/tap-coin.png`. To change it:
+
+1. Copy your own PNG, JPG or WebP into `assets/` (transparent PNG recommended).
+2. In `ClickCoin.tsx`, change the single `COIN_IMAGE` line, for example:
+
+```tsx
+const COIN_IMAGE = require('../../assets/my-new-coin.png');
+```
+
+The image is displayed with `resizeMode="contain"`, so its aspect ratio is kept.
+The animation and press handler are inside ClickCoin, and the gameplay logic
+remains in App.tsx. Metro requires a **literal** file path in `require(...)`.
+Reload Expo after changing the image. The older `TapCoin.tsx` component is not
+used by the current App screen.
