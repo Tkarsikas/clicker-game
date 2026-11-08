@@ -40,21 +40,11 @@ export default function App() {
   const float = useRef(new Animated.Value(0)).current;
   const flash = useRef(new Animated.Value(0)).current;
   const id = useRef(0);
-  const bonk = useAudioPlayer(require('./assets/sounds/bonk.wav'));
-  const boing = useAudioPlayer(require('./assets/sounds/boing.wav'));
-  const clang = useAudioPlayer(require('./assets/sounds/clang.wav'));
-  const thump = useAudioPlayer(require('./assets/sounds/thump.wav'));
-  const previousSound = useRef(-1);
+  const punchPlayer = useAudioPlayer(require('./assets/sounds/punch-bag.wav'));
 
-  const playRandomHit = () => {
-    const players = [bonk, boing, clang, thump];
-    // Avoid repeating the same effect on consecutive taps.
-    const option = Math.floor(Math.random() * (players.length - 1));
-    const index = option >= previousSound.current ? option + 1 : option;
-    previousSound.current = index;
-    const player = players[index];
-    // Restart quickly if the same player is already playing.
-    void player.seekTo(0).then(() => player.play()).catch(() => player.play());
+  const playPunch = () => {
+    // Replay a single short, low impact sound on every coin tap.
+    void punchPlayer.seekTo(0).then(() => punchPlayer.play()).catch(() => punchPlayer.play());
   };
 
   useEffect(() => {
@@ -96,7 +86,7 @@ export default function App() {
     ]);
     setNow(time);
     setWallet(previous => previous + power);
-    playRandomHit();
+    playPunch();
     setFlashId(previous => previous + 1);
     bounce.stopAnimation();
     bounce.setValue(0.87);
