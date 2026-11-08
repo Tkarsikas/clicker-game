@@ -9,7 +9,7 @@ import { Animated, Easing, Image, Pressable, StyleSheet, View } from 'react-nati
  *
  * Metro requires a literal path; do not use a variable or template string.
  */
-const COIN_IMAGE = require('../../assets/tap-coin.png');
+const COIN_IMAGE = require('../../assets/Testi.jpeg');
 
 type ClickCoinProps = {
   size: number;
