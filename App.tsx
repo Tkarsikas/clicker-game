@@ -161,7 +161,7 @@ export default function App() {
           <Text style={[styles.sparkle, { top: 28, left: 38 }]}>✦</Text>
           <Text style={[styles.sparkle, { top: 70, right: 28 }]}>✧</Text>
           <Text style={[styles.sparkle, { bottom: 42, left: 26 }]}>✧</Text>
-          <ClickCoin size={coinSize} onPress={click} disabled={won} />
+          <ClickCoin size={coinSize} level={level + 1} onPress={click} disabled={won} />
           <Animated.Text
             key={flashId}
             pointerEvents="none"
