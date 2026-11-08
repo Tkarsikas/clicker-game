@@ -8,7 +8,6 @@ import {
   SafeAreaView,
   StatusBar as NativeStatusBar,
   useWindowDimensions,
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -23,7 +22,10 @@ const C = {
 
 export default function App() {
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
-  const compact = screenHeight < 780 || screenWidth < 375;
+  // All content stays in one viewport; the playfield uses remaining space.
+  const compact = screenHeight < 820 || screenWidth < 390;
+  const veryCompact = screenHeight < 690;
+  const coinSize = Math.max(92, Math.min(174, (screenHeight - (Platform.OS === 'android' ? 48 : 20) - 400) * 0.65, screenWidth * 0.43));
   const [level, setLevel] = useState(0);
   const [wallet, setWallet] = useState(0);
   const [power, setPower] = useState(1);
@@ -120,11 +122,11 @@ export default function App() {
   return (
     <SafeAreaView style={[styles.root, Platform.OS === 'android' && { paddingTop: NativeStatusBar.currentHeight ?? 24, paddingBottom: 24 }]}>
       <StatusBar style="light" />
-      <ScrollView style={styles.scroller} contentContainerStyle={[styles.scroll, compact && styles.compactScroll]} bounces={false} showsVerticalScrollIndicator keyboardShouldPersistTaps="handled">
-        <View style={[styles.heading, compact && styles.compactHeading]}>
-          <Text style={styles.overline}>✦ THE ULTIMATE TAP CHALLENGE ✦</Text>
+      <View style={[styles.screen, compact && styles.compactScreen, veryCompact && styles.tinyScreen]}>
+        <View style={[styles.heading, compact && styles.compactHeading, veryCompact && styles.tinyHeading]}>
+          {!veryCompact && <Text style={styles.overline}>✦ THE ULTIMATE TAP CHALLENGE ✦</Text>}
           <Text style={styles.title}>COIN <Text style={styles.titleAccent}>QUEST</Text></Text>
-          <Text style={styles.subtitle}>Tap fast. Power up. Conquer all five levels.</Text>
+          {!compact && <Text style={styles.subtitle}>Tap fast. Power up. Conquer all five levels.</Text>}
         </View>
 
         <View style={styles.levelRow}>
@@ -132,9 +134,9 @@ export default function App() {
           <Text style={styles.levelTag}>{won ? 'CHAMPION' : unlocked ? 'READY!' : 'IN PROGRESS'}</Text>
         </View>
 
-        <View style={styles.scoreCard}>
+        <View style={[styles.scoreCard, compact && styles.compactScoreCard]}>
           <Text style={styles.statCaption}>POINTS IN THE LAST 10 SECONDS</Text>
-          <Text style={styles.score}>{recent}<Text style={styles.scoreTarget}> / {goal}</Text></Text>
+          <Text style={[styles.score, compact && styles.compactScore]}>{recent}<Text style={styles.scoreTarget}> / {goal}</Text></Text>
           <View style={styles.track}>
             <View style={[styles.trackFill, { width: `${percentage}%` }]} />
           </View>
@@ -144,15 +146,15 @@ export default function App() {
           </View>
         </View>
 
-        <View style={styles.statsRow}>
-          <View style={styles.miniCard}>
+        <View style={[styles.statsRow, compact && styles.compactStatsRow]}>
+          <View style={[styles.miniCard, compact && styles.compactMiniCard]}>
             <Text style={styles.miniIcon}>🪙</Text>
             <View>
               <Text style={styles.miniLabel}>YOUR COINS</Text>
               <Text style={styles.miniValue}>{wallet}</Text>
             </View>
           </View>
-          <View style={styles.miniCard}>
+          <View style={[styles.miniCard, compact && styles.compactMiniCard]}>
             <Text style={styles.miniIcon}>⚡</Text>
             <View>
               <Text style={styles.miniLabel}>PER TAP</Text>
@@ -161,18 +163,18 @@ export default function App() {
           </View>
         </View>
 
-        <View style={[styles.playArea, compact && styles.compactPlayArea]}>
-          <View style={styles.haloOuter} />
-          <View style={styles.haloInner} />
+        <View style={styles.playArea}>
+          <View style={[styles.haloOuter, { width: coinSize * 1.38, height: coinSize * 1.38, borderRadius: coinSize }]} />
+          <View style={[styles.haloInner, { width: coinSize * 1.16, height: coinSize * 1.16, borderRadius: coinSize }]} />
           <Text style={[styles.sparkle, { top: 28, left: 38 }]}>✦</Text>
           <Text style={[styles.sparkle, { top: 70, right: 28 }]}>✧</Text>
           <Text style={[styles.sparkle, { bottom: 42, left: 26 }]}>✧</Text>
           <Animated.View style={{ transform: [{ translateY: floatingY }, { rotate: tilt }, { scale: bounce }] }}>
             <Pressable accessibilityRole="button" accessibilityLabel="Tap the magic coin" onPress={click} disabled={won}>
-              <View style={styles.coinShadow}>
+              <View style={[styles.coinShadow, { width: coinSize, height: coinSize, borderRadius: coinSize / 2 }]}>
                 <View style={styles.coinOuter}>
                   <View style={styles.coinInner}>
-                    <Text style={styles.coinStar}>★</Text>
+                    <Text style={[styles.coinStar, { fontSize: coinSize * 0.44 }]}>★</Text>
                   </View>
                 </View>
               </View>
@@ -220,26 +222,31 @@ export default function App() {
             <Pressable accessibilityRole="button" onPress={reset}><Text style={styles.reset}>PLAY AGAIN ↻</Text></Pressable>
           </View>
         ) : (
-          <Text style={styles.footerHint}>Reach {goal} points in 10 seconds to unlock the next level.</Text>
+          <View style={styles.footerSlot}><Text style={styles.footerHint}>Reach {goal} points in 10 seconds to unlock the next level.</Text></View>
         )}
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bg },
-  scroller: { flex: 1 },
-  compactScroll: { paddingTop: 12, paddingBottom: 64 },
-  compactHeading: { marginBottom: 12 },
-  compactPlayArea: { height: 235 },
-  scroll: { flexGrow: 1, paddingHorizontal: 20, paddingTop: 24, paddingBottom: 64, alignItems: 'stretch' },
-  heading: { alignItems: 'center', marginBottom: 24 },
+  screen: { flex: 1, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12 },
+  compactScreen: { paddingTop: 6, paddingBottom: 6, paddingHorizontal: 14 },
+  tinyScreen: { paddingTop: 2, paddingBottom: 2 },
+  compactHeading: { marginBottom: 5 },
+  tinyHeading: { marginBottom: 2 },
+  compactScoreCard: { paddingVertical: 8, paddingHorizontal: 14 },
+  compactScore: { fontSize: 27, marginVertical: 2 },
+  compactStatsRow: { marginTop: 6 },
+  compactMiniCard: { paddingVertical: 7, paddingHorizontal: 10 },
+  footerSlot: { minHeight: 44, justifyContent: 'center' },
+  heading: { alignItems: 'center', marginBottom: 12 },
   overline: { color: C.lavender, fontSize: 10, letterSpacing: 2, fontWeight: '800' },
   title: { color: C.gold, fontSize: 39, fontWeight: '900', letterSpacing: -1, marginTop: 6, textShadowColor: '#6840a0', textShadowRadius: 12 },
   titleAccent: { color: C.white },
   subtitle: { color: C.muted, fontSize: 12, marginTop: 2, textAlign: 'center' },
-  levelRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
+  levelRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 },
   levelLabel: { color: C.gold, fontWeight: '900', fontSize: 16 },
   levelTag: { color: C.green, fontWeight: '800', fontSize: 10, letterSpacing: 1 },
   scoreCard: { backgroundColor: C.panel, borderRadius: 20, borderWidth: 1, borderColor: C.panelEdge, padding: 20 },
@@ -250,12 +257,12 @@ const styles = StyleSheet.create({
   trackFill: { height: '100%', backgroundColor: C.green, borderRadius: 20 },
   progressRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 },
   progressLabel: { color: C.muted, fontSize: 11 },
-  statsRow: { flexDirection: 'row', gap: 12, marginTop: 14 },
+  statsRow: { flexDirection: 'row', gap: 12, marginTop: 8 },
   miniCard: { flex: 1, flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: C.panel, padding: 14, borderRadius: 16, borderColor: C.panelEdge, borderWidth: 1 },
   miniIcon: { fontSize: 24 },
   miniLabel: { color: C.muted, fontWeight: '800', fontSize: 10 },
   miniValue: { color: C.white, fontSize: 23, fontWeight: '900' },
-  playArea: { height: 285, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  playArea: { flex: 1, minHeight: 0, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   haloOuter: { position: 'absolute', width: 245, height: 245, borderRadius: 130, backgroundColor: '#413277', opacity: 0.26 },
   haloInner: { position: 'absolute', width: 203, height: 203, borderRadius: 110, backgroundColor: '#9e6bff', opacity: 0.14 },
   sparkle: { position: 'absolute', color: C.gold, fontSize: 26 },
@@ -264,8 +271,8 @@ const styles = StyleSheet.create({
   coinInner: { width: '100%', height: '100%', borderRadius: 100, backgroundColor: '#ffca42', borderColor: '#d88110', borderWidth: 4, alignItems: 'center', justifyContent: 'center' },
   coinStar: { fontSize: 77, color: '#fff1a1', textShadowColor: '#c67a13', textShadowOffset: { width: 3, height: 5 }, textShadowRadius: 1 },
   popText: { position: 'absolute', color: C.gold, fontSize: 31, fontWeight: '900', top: 27, alignSelf: 'center' },
-  tapHint: { position: 'absolute', bottom: 10, color: C.lavender, fontWeight: '900', fontSize: 12, letterSpacing: 2 },
-  upgradeCard: { backgroundColor: C.purple, padding: 15, borderRadius: 18, flexDirection: 'row', alignItems: 'center', gap: 12, borderBottomWidth: 5, borderBottomColor: '#5235b5' },
+  tapHint: { position: 'absolute', bottom: 1, color: C.lavender, fontWeight: '900', fontSize: 12, letterSpacing: 2 },
+  upgradeCard: { backgroundColor: C.purple, padding: 9, borderRadius: 18, flexDirection: 'row', alignItems: 'center', gap: 12, borderBottomWidth: 5, borderBottomColor: '#5235b5' },
   upgradeLocked: { opacity: 0.55 },
   pressed: { transform: [{ scale: 0.98 }] },
   upgradeIcon: { height: 44, width: 44, borderRadius: 13, backgroundColor: '#a990ff', alignItems: 'center', justifyContent: 'center' },
@@ -274,10 +281,10 @@ const styles = StyleSheet.create({
   upgradeTitle: { color: C.white, fontWeight: '900', fontSize: 13 },
   upgradeSubtitle: { color: '#efeaff', fontSize: 11, marginTop: 5 },
   upgradeArrow: { color: C.white, fontSize: 32 },
-  advanceButton: { backgroundColor: C.green, padding: 16, borderRadius: 14, marginTop: 14, alignItems: 'center' },
+  advanceButton: { backgroundColor: C.green, padding: 11, borderRadius: 14, marginTop: 6, alignItems: 'center' },
   advanceText: { color: '#092c28', fontWeight: '900', fontSize: 16 },
-  footerHint: { color: C.muted, textAlign: 'center', fontSize: 12, marginTop: 20, lineHeight: 18 },
-  victory: { alignItems: 'center', marginTop: 16 },
+  footerHint: { color: C.muted, textAlign: 'center', fontSize: 11, lineHeight: 15 },
+  victory: { alignItems: 'center', marginTop: 3 },
   victoryTitle: { color: C.gold, fontWeight: '900', fontSize: 25 },
   reset: { color: C.green, fontWeight: '900', padding: 14 },
 });
