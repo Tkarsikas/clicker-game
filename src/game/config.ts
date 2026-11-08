@@ -9,7 +9,7 @@ export const GAME_CONFIG = {
   levelTargets: [20, 50, 100, 200, 400],
 
   // Length of the rolling score window in seconds.
-  scoreWindowSeconds: 10,
+  scoreWindowSeconds: 1,
 
   // Points awarded by the first tap.
   startingPointsPerClick: 1,

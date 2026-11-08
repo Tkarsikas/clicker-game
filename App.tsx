@@ -27,7 +27,14 @@ export default function App() {
   // All content stays in one viewport; the playfield uses remaining space.
   const compact = screenHeight < 820 || screenWidth < 390;
   const veryCompact = screenHeight < 690;
-  const coinSize = Math.max(92, Math.min(174, (screenHeight - (Platform.OS === 'android' ? 48 : 20) - 400) * 0.65, screenWidth * 0.43));
+const coinSize = Math.max(
+  120,
+  Math.min(
+    240,
+    (screenHeight - (Platform.OS === 'android' ? 48 : 20) - 400) * 0.85,
+    screenWidth * 0.65
+  )
+);
   const [level, setLevel] = useState(0);
   const [wallet, setWallet] = useState(GAME_CONFIG.startingCoins);
   const [power, setPower] = useState(GAME_CONFIG.startingPointsPerClick);
