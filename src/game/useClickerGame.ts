@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { INITIAL_UPGRADE_COST, LEVEL_TARGETS, nextUpgradeCost, WINDOW_MS } from './config';
+import { GAME_CONFIG, INITIAL_UPGRADE_COST, LEVEL_TARGETS, nextUpgradeCost, WINDOW_MS } from './config';
 
 type Click = { at: number; earned: number };
 
 export function useClickerGame() {
   const [level, setLevel] = useState(0);
-  const [balance, setBalance] = useState(0);
+  const [balance, setBalance] = useState(GAME_CONFIG.startingCoins);
   const [lifetime, setLifetime] = useState(0);
-  const [power, setPower] = useState(1);
+  const [power, setPower] = useState(GAME_CONFIG.startingPointsPerClick);
   const [upgradeCost, setUpgradeCost] = useState(INITIAL_UPGRADE_COST);
   const [now, setNow] = useState(Date.now());
   const [completed, setCompleted] = useState(false);
@@ -43,7 +43,7 @@ export function useClickerGame() {
   const upgrade = useCallback(() => {
     if (won || balance < upgradeCost) return;
     setBalance((value) => value - upgradeCost);
-    setPower((value) => value + 1);
+    setPower((value) => value + GAME_CONFIG.pointsPerUpgrade);
     setUpgradeCost(nextUpgradeCost(upgradeCost));
   }, [balance, upgradeCost, won]);
 
@@ -62,9 +62,9 @@ export function useClickerGame() {
   const restart = useCallback(() => {
     clicks.current = [];
     setLevel(0);
-    setBalance(0);
+    setBalance(GAME_CONFIG.startingCoins);
     setLifetime(0);
-    setPower(1);
+    setPower(GAME_CONFIG.startingPointsPerClick);
     setUpgradeCost(INITIAL_UPGRADE_COST);
     setRecent(0);
     setCompleted(false);

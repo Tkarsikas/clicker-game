@@ -13,7 +13,8 @@ import {
   Text,
   View,
 } from 'react-native';
-import { LEVEL_TARGETS, nextUpgradePrice, rollingScore, Tap, WINDOW_MS } from './src/game';
+import { rollingScore, type Tap } from './src/game';
+import { GAME_CONFIG, LEVEL_TARGETS, nextUpgradeCost, WINDOW_MS } from './src/game/config';
 
 const C = {
   bg: '#0c1026', panel: '#1b2146', panelEdge: '#39427b',
@@ -28,9 +29,9 @@ export default function App() {
   const veryCompact = screenHeight < 690;
   const coinSize = Math.max(92, Math.min(174, (screenHeight - (Platform.OS === 'android' ? 48 : 20) - 400) * 0.65, screenWidth * 0.43));
   const [level, setLevel] = useState(0);
-  const [wallet, setWallet] = useState(0);
-  const [power, setPower] = useState(1);
-  const [upgradePrice, setUpgradePrice] = useState(20);
+  const [wallet, setWallet] = useState(GAME_CONFIG.startingCoins);
+  const [power, setPower] = useState(GAME_CONFIG.startingPointsPerClick);
+  const [upgradePrice, setUpgradePrice] = useState(GAME_CONFIG.initialUpgradeCost);
   const [taps, setTaps] = useState<Tap[]>([]);
   const [now, setNow] = useState(Date.now());
   const [cleared, setCleared] = useState(false);
@@ -52,7 +53,7 @@ export default function App() {
       const time = Date.now();
       setNow(time);
       setTaps(previous => previous.filter(t => time - t.timestamp < WINDOW_MS));
-    }, 100);
+    }, GAME_CONFIG.scoreRefreshIntervalMs);
     return () => clearInterval(interval);
   }, []);
 
@@ -99,8 +100,8 @@ export default function App() {
   const upgrade = () => {
     if (won || wallet < upgradePrice) return;
     setWallet(previous => previous - upgradePrice);
-    setPower(previous => previous + 1);
-    setUpgradePrice(nextUpgradePrice(upgradePrice));
+    setPower(previous => previous + GAME_CONFIG.pointsPerUpgrade);
+    setUpgradePrice(nextUpgradeCost(upgradePrice));
   };
 
   const advance = () => {
@@ -116,9 +117,9 @@ export default function App() {
 
   const reset = () => {
     setLevel(0);
-    setWallet(0);
-    setPower(1);
-    setUpgradePrice(20);
+    setWallet(GAME_CONFIG.startingCoins);
+    setPower(GAME_CONFIG.startingPointsPerClick);
+    setUpgradePrice(GAME_CONFIG.initialUpgradeCost);
     setTaps([]);
     setCleared(false);
     setWon(false);
@@ -143,14 +144,14 @@ export default function App() {
         </View>
 
         <View style={[styles.scoreCard, compact && styles.compactScoreCard]}>
-          <Text style={styles.statCaption}>POINTS IN THE LAST 10 SECONDS</Text>
+          <Text style={styles.statCaption}>POINTS IN THE LAST {GAME_CONFIG.scoreWindowSeconds} SECONDS</Text>
           <Text style={[styles.score, compact && styles.compactScore]}>{recent}<Text style={styles.scoreTarget}> / {goal}</Text></Text>
           <View style={styles.track}>
             <View style={[styles.trackFill, { width: `${percentage}%` }]} />
           </View>
           <View style={styles.progressRow}>
             <Text style={styles.progressLabel}>{percentage}% of target</Text>
-            <Text style={styles.progressLabel}>10s rolling window</Text>
+            <Text style={styles.progressLabel}>{GAME_CONFIG.scoreWindowSeconds}s rolling window</Text>
           </View>
         </View>
 
@@ -215,14 +216,14 @@ export default function App() {
           <View style={styles.upgradeIcon}><Text style={styles.upgradeEmoji}>⬆</Text></View>
           <View style={styles.upgradeCopy}>
             <Text style={styles.upgradeTitle}>POWER UP YOUR TAP</Text>
-            <Text style={styles.upgradeSubtitle}>+1 point per tap  ·  🪙 {upgradePrice} coins</Text>
+            <Text style={styles.upgradeSubtitle}>+{GAME_CONFIG.pointsPerUpgrade} point(s) per tap  ·  🪙 {upgradePrice} coins</Text>
           </View>
           <Text style={styles.upgradeArrow}>›</Text>
         </Pressable>
 
         {unlocked && !won ? (
           <Pressable accessibilityRole="button" onPress={advance} style={styles.advanceButton}>
-            <Text style={styles.advanceText}>{level === 4 ? '🏆 CLAIM VICTORY' : 'NEXT LEVEL  →'}</Text>
+            <Text style={styles.advanceText}>{level === LEVEL_TARGETS.length - 1 ? '🏆 CLAIM VICTORY' : 'NEXT LEVEL  →'}</Text>
           </Pressable>
         ) : won ? (
           <View style={styles.victory}>
@@ -230,7 +231,7 @@ export default function App() {
             <Pressable accessibilityRole="button" onPress={reset}><Text style={styles.reset}>PLAY AGAIN ↻</Text></Pressable>
           </View>
         ) : (
-          <View style={styles.footerSlot}><Text style={styles.footerHint}>Reach {goal} points in 10 seconds to unlock the next level.</Text></View>
+          <View style={styles.footerSlot}><Text style={styles.footerHint}>Reach {goal} points in {GAME_CONFIG.scoreWindowSeconds} seconds to unlock the next level.</Text></View>
         )}
       </View>
     </SafeAreaView>

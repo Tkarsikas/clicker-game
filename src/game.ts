@@ -1,5 +1,7 @@
-export const LEVEL_TARGETS = [20, 50, 100, 200, 400] as const;
-export const WINDOW_MS = 10_000;
+import { WINDOW_MS, nextUpgradeCost } from './game/config';
+
+// Re-export so older modules importing from src/game.ts keep working.
+export { LEVEL_TARGETS, WINDOW_MS } from './game/config';
 
 export type Tap = { id: number; timestamp: number; points: number };
 
@@ -10,6 +12,4 @@ export function rollingScore(taps: Tap[], now: number): number {
   );
 }
 
-export function nextUpgradePrice(current: number): number {
-  return Math.ceil(current * 1.8);
-}
+export const nextUpgradePrice = nextUpgradeCost;
